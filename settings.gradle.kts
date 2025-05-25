@@ -14,4 +14,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "nostr-kmp"
-include(":lib")
+include(":nostr-kmp")
