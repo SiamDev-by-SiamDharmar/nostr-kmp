@@ -10,6 +10,7 @@ plugins {
     alias(libs.plugins.vanniktech.mavenPublish)
 //    id("com.google.devtools.ksp") version "2.1.21-2.0.1"
 //    id("de.jensklingenberg.ktorfit") version "2.5.1"
+    id("signing")
 }
 
 group = "org.nostr.sdk"
@@ -20,9 +21,6 @@ kotlin {
     jvm() {
         compilations.all {
             kotlinOptions.jvmTarget = "11"
-        }
-        testRuns["test"].executionTask.configure {
-            useJUnitPlatform()
         }
     }
     androidTarget {
@@ -62,22 +60,6 @@ kotlin {
             }
         }
 
-//        val iosMain by creating {
-//            dependsOn(commonMain)
-//        }
-//
-//        val iosTest by creating {
-//            dependsOn(commonTest)
-//        }
-//
-//        val iosX64Main by getting { dependsOn(iosMain) }
-//        val iosArm64Main by getting { dependsOn(iosMain) }
-//        val iosSimulatorArm64Main by getting { dependsOn(iosMain) }
-//
-//        val iosX64Test by getting { dependsOn(iosTest) }
-//        val iosArm64Test by getting { dependsOn(iosTest) }
-//        val iosSimulatorArm64Test by getting { dependsOn(iosTest) }
-
     }
 
 
@@ -100,20 +82,12 @@ android {
     }
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs += listOf("-Xexpect-actual-classes")
-    }
-}
-
-
-
 mavenPublishing {
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
 
-    signAllPublications()
+    //signAllPublications()
 
-    coordinates(group.toString(), "lib", version.toString())
+    coordinates(group.toString(), "nostr-kmp", version.toString())
 
     pom {
         name = "My library"
@@ -140,4 +114,8 @@ mavenPublishing {
             developerConnection = "ZZZ"
         }
     }
+}
+
+signing {
+    isRequired = false
 }
