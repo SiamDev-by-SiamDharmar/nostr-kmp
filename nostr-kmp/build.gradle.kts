@@ -1,28 +1,58 @@
-@file:Suppress("UnstableApiUsage")
+@file:OptIn(ExperimentalWasmDsl::class)
 
 import com.vanniktech.maven.publish.SonatypeHost
+import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
+import java.util.Locale
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.vanniktech.mavenPublish)
-//    id("com.google.devtools.ksp") version "2.1.21-2.0.1"
-//    id("de.jensklingenberg.ktorfit") version "2.5.1"
     id("signing")
 }
 
 group = "org.nostr.sdk"
 version = "0.1.0"
 
+
+enum class OsName { WINDOWS, MAC, LINUX, UNKNOWN }
+enum class OsArch { X86_32, X86_64, ARM64, UNKNOWN }
+data class OsType(val name: OsName, val arch: OsArch)
+
+val currentOsType = run {
+    val gradleOs = OperatingSystem.current()
+    val osName = when {
+        gradleOs.isMacOsX -> OsName.MAC
+        gradleOs.isWindows -> OsName.WINDOWS
+        gradleOs.isLinux -> OsName.LINUX
+        else -> OsName.UNKNOWN
+    }
+
+    val osArch = when (providers.systemProperty("sun.arch.data.model").get()) {
+        "32" -> OsArch.X86_32
+        "64" -> when (providers.systemProperty("os.arch").get().lowercase(Locale.getDefault())) {
+            "aarch64" -> OsArch.ARM64
+            else -> OsArch.X86_64
+        }
+        else -> OsArch.UNKNOWN
+    }
+
+    OsType(osName, osArch)
+}
+
+
 kotlin {
 
-    jvm() {
+    jvm {
         compilations.all {
             kotlinOptions.jvmTarget = "11"
         }
     }
+
     androidTarget {
         publishLibraryVariants("release", "debug")
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
@@ -31,20 +61,30 @@ kotlin {
         }
     }
 
+/*
+    when (currentOsType.name) {
+        OsName.MAC -> {
+            iosX64()
+            iosArm64()
+            iosSimulatorArm64()
+        }
+        OsName.LINUX -> linuxX64()
+        OsName.WINDOWS -> mingwX64()
+        else -> println("Unsupported Platform: ${currentOsType.name}")
+    }
+*/
+
     iosX64()
     iosArm64()
     iosSimulatorArm64()
     linuxX64()
-    //mingwX64()
+    mingwX64()
 
     sourceSets {
         val commonMain by getting {
             dependencies {
                 implementation(libs.kotlin.stdlib.common)
-                //implementation(libs.ktorfit.lib)
                 implementation(libs.ktor.client.websockets)
-                implementation(libs.bitcoin.kmp)
-                implementation(libs.multiplatform.crypto.libsodium.bindings)
             }
         }
         val commonTest by getting {
@@ -60,15 +100,32 @@ kotlin {
             }
         }
 
+//        val wasmJsMain by getting {
+//            dependencies {
+//                // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-browser
+//                //implementation("org.jetbrains.kotlinx:kotlinx-browser:0.3")
+//            }
+//        }
+
     }
 
 
-
-    sourceSets.jvmMain.dependencies {
-        implementation(kotlin("test"))
+    wasmJs {
+        browser {
+            commonWebpackConfig {
+                devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
+                    static = (static ?: mutableListOf()).apply {
+                        add(project.rootDir.path)
+                    }
+                }
+            }
+        }
+        binaries.executable()
+        nodejs()
     }
 
 }
+
 
 android {
     namespace = "org.nostr.sdk"
@@ -90,9 +147,9 @@ mavenPublishing {
     coordinates(group.toString(), "nostr-kmp", version.toString())
 
     pom {
-        name = "My library"
+        name = "nostr-kmp"
         description = "A library."
-        inceptionYear = "2024"
+        inceptionYear = "2025"
         url = "https://github.com/SiamDev-by-SiamDharmar/nostr-kmp/"
         licenses {
             license {
