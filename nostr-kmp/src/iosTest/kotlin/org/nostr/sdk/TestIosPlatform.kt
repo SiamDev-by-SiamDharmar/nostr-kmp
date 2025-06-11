@@ -7,7 +7,7 @@ class TestIosPlatform {
 
     @Test
     fun testIosDeviceInfo() {
-        val platformInfo = IosPlatform.info
+        val platformInfo = getPlatform().name
         println(platformInfo)
         assertTrue(platformInfo.isNotBlank())
     }

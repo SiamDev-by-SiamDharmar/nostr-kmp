@@ -7,7 +7,7 @@ class TestNativePlatform {
 
     @Test
     fun testNativePlatformName() {
-        val name = NativePlatform.NATIVE_OS_NAME
+        val name = getPlatform().name
         println("Native OS: $name")
         assertTrue(name.isNotEmpty(), "Native platform name should not be empty")
     }

@@ -7,7 +7,7 @@ class TestAndroidPlatform {
 
     @Test
     fun testAndroidPlatformInfo() {
-        val platformInfo = AndroidPlatform.info
+        val platformInfo = getPlatform().name
         println(platformInfo)
         assertTrue(platformInfo.isNotBlank())
     }
