@@ -1,11 +1,7 @@
-@file:OptIn(ExperimentalWasmDsl::class)
-
 import com.vanniktech.maven.publish.SonatypeHost
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 import java.util.Locale
 
 plugins {
@@ -100,29 +96,9 @@ kotlin {
             }
         }
 
-//        val wasmJsMain by getting {
-//            dependencies {
-//                // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-browser
-//                //implementation("org.jetbrains.kotlinx:kotlinx-browser:0.3")
-//            }
-//        }
 
     }
 
-
-    wasmJs {
-        browser {
-            commonWebpackConfig {
-                devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
-                    static = (static ?: mutableListOf()).apply {
-                        add(project.rootDir.path)
-                    }
-                }
-            }
-        }
-        binaries.executable()
-        nodejs()
-    }
 
 }
 
